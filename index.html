@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Progression Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .calculator {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .calculator input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .calculator button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            color: #fff;
+            background: #007BFF;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .calculator button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Level Progression Calculator</h2>
+        <form id="calculator-form" onsubmit="calculateLevel(event)">
+            <input type="number" id="current-xp" placeholder="Enter your current XP" required>
+            <button type="submit">Calculate</button>
+        </form>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function calculateXpToNextLevel(level) {
+            return 206 * (level ** 2) + 206 * level + 88;
+        }
+
+        function calculateLevel(currentXp) {
+            let totalXp = 0;
+            for (let level = 1; level <= 99; level++) {
+                const xpToNext = calculateXpToNextLevel(level);
+                if (currentXp < totalXp + xpToNext) {
+                    const xpNeeded = totalXp + xpToNext - currentXp;
+                    return { level, xpNeeded, totalXp };
+                }
+                totalXp += xpToNext;
+            }
+            return { level: 99, xpNeeded: 0, totalXp };
+        }
+
+        function calculateLevel(event) {
+            event.preventDefault();
+            const currentXp = parseInt(document.getElementById("current-xp").value, 10);
+            const resultDiv = document.getElementById("result");
+
+            if (isNaN(currentXp) || currentXp < 0) {
+                resultDiv.innerHTML = `<p>Please enter a valid XP value.</p>`;
+                return;
+            }
+
+            const { level, xpNeeded, totalXp } = calculateLevel(currentXp);
+
+            resultDiv.innerHTML = `
+                <p>Current Level: ${level}</p>
+                <p>XP Needed to Next Level: ${xpNeeded}</p>
+                <p>Total XP Earned at Current Level: ${totalXp}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
