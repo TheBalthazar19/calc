@@ -50,7 +50,9 @@
 <body>
     <div class="calculator">
         <h2>Level Progression Calculator</h2>
-        <form id="calculator-form" onsubmit="calculateLevel(event)">
+        <form id="calculator-form" onsubmit="calculateXpToReachLevel(event)">
+            <input type="number" id="current-level" placeholder="Enter your current level" required>
+            <input type="number" id="target-level" placeholder="Enter target level" required>
             <input type="number" id="current-xp" placeholder="Enter your current XP" required>
             <button type="submit">Calculate</button>
         </form>
@@ -58,41 +60,48 @@
     </div>
 
     <script>
-        function calculateXpToNextLevel(level) {
-            return 206 * (level ** 2) + 206 * level + 88;
-        }
+        const xpToReachLevel = [
+            0, 500, 1824, 4384, 8592, 14860, 23600, 35224, 50144, 68772, 91520, 118800, 151024, 188604, 231952, 281480, 337600, 400724, 471264, 549632, 636240, 731500, 835824, 949624, 1073312, 1207300, 1352000, 1507824, 1675184, 1854492, 2046160, 2250600, 2468224, 2699444, 2944672, 3478800, 3478800, 3768524, 4073904, 4395352, 4733280, 5088100, 5460224, 5850064, 6258032, 6684540, 7130000, 7594824, 8079424, 8584212, 9109600, 9656000, 10223824, 10813484, 11425392, 12059960, 12717600, 13398724, 14103744, 14833072, 15587120, 16366300, 17171024, 18001704, 18858752, 19742580, 20653600, 21592224, 22558864, 23553932, 24577840, 25631000, 26713824, 27826724, 28970112, 30144400, 31350000, 32587324, 33856784, 35158792, 36493760, 37862100, 39264224, 40700544, 42171472, 43677420, 45218800, 46796024, 48409504, 50059652, 51746880, 53471600, 55234224, 57035164, 58874832, 60753640, 62672000, 64630324, 66629024
+        ];
 
-        function calculateLevel(currentXp) {
-            let totalXp = 0;
-            for (let level = 1; level <= 99; level++) {
-                const xpToNext = calculateXpToNextLevel(level);
-                if (currentXp < totalXp + xpToNext) {
-                    const xpNeeded = totalXp + xpToNext - currentXp;
-                    return { level, xpNeeded, totalXp };
-                }
-                totalXp += xpToNext;
+        function calculateXpToReachTarget(currentLevel, targetLevel, currentXp) {
+            if (targetLevel <= currentLevel) {
+                return { xpNeeded: 0, error: "Target level must be higher than current level." };
             }
-            return { level: 99, xpNeeded: 0, totalXp };
+
+            const xpAtCurrentLevel = xpToReachLevel[currentLevel] || 0;
+            const xpAtTargetLevel = xpToReachLevel[targetLevel] || 0;
+
+            // Subtract current XP from total XP to get remaining XP needed
+            let xpNeeded = xpAtTargetLevel - xpAtCurrentLevel - currentXp;
+
+            return { xpNeeded: Math.max(0, Math.floor(xpNeeded)), error: "" };
         }
 
-        function calculateLevel(event) {
+        function calculateXpToReachLevel(event) {
             event.preventDefault();
+
+            const currentLevel = parseInt(document.getElementById("current-level").value, 10);
+            const targetLevel = parseInt(document.getElementById("target-level").value, 10);
             const currentXp = parseInt(document.getElementById("current-xp").value, 10);
             const resultDiv = document.getElementById("result");
 
-            if (isNaN(currentXp) || currentXp < 0) {
-                resultDiv.innerHTML = `<p>Please enter a valid XP value.</p>`;
+            if (isNaN(currentLevel) || isNaN(targetLevel) || isNaN(currentXp) || currentLevel <= 0 || targetLevel <= 0 || currentXp < 0) {
+                resultDiv.innerHTML = `<p>Please enter valid levels and XP.</p>`;
                 return;
             }
 
-            const { level, xpNeeded, totalXp } = calculateLevel(currentXp);
+            const { xpNeeded, error } = calculateXpToReachTarget(currentLevel, targetLevel, currentXp);
 
-            resultDiv.innerHTML = `
-                <p>Current Level: ${level}</p>
-                <p>XP Needed to Next Level: ${xpNeeded}</p>
-                <p>Total XP Earned at Current Level: ${totalXp}</p>
-            `;
+            if (error) {
+                resultDiv.innerHTML = `<p>${error}</p>`;
+            } else {
+                resultDiv.innerHTML = `
+                    <p>Total XP Needed to Reach Level ${targetLevel} from Level ${currentLevel}: ${xpNeeded}</p>
+                `;
+            }
         }
     </script>
 </body>
 </html>
+
